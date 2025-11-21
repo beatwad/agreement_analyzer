@@ -1,12 +1,12 @@
 # Agreement Analyzer Chrome Extension
 
-A Google Chrome Extension that uses AI to analyze legal text, Terms of Service, and contracts. It connects to a local Python backend powered by **FastAPI**, **LangChain**, and **Google Gemini**.
+A Google Chrome Extension that uses AI to analyze text or link to Terms of Service/User Agreement/Contract and finds the real and potential red flags in it. It connects to a local Python backend powered by **FastAPI**, **LangChain**, and **Google Gemini** (can be replaced with any other LLM provider).
 
 ## 🚀 Features
 
 *   **Analyze Page:** Right-click anywhere on a page to analyze the visible text.
 *   **Analyze Link:** Right-click a link (e.g., "Terms of Service") to scrape that URL and analyze its content without visiting it manually.
-*   **AI Summaries:** Uses Google's Gemini Pro model to highlight key points, red flags, and summaries.
+*   **AI Summaries:** Uses LLM to highlight key points, red flags, and summaries.
 *   **BYOK (Bring Your Own Key):** Securely input your own Google Gemini API Key in the extension settings.
 
 ## 🛠️ Tech Stack
