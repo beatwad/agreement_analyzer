@@ -1,0 +1,24 @@
+{
+    "manifest_version": 3,
+    "name": "Agreement Analyzer",
+    "version": "1.0",
+    "description": "Analyze legal text using LLM",
+    "permissions": [
+      "contextMenus",
+      "activeTab",
+      "scripting",
+      "storage"
+    ],
+    "host_permissions": [
+      "http://127.0.0.1:8000/*"
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "options_page": "options.html",
+    "icons": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  }

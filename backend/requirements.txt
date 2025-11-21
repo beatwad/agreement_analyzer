@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+langchain-google-genai
+google-genai
+langchain
+langchain-core
+beautifulsoup4
+requests
+pydantic
+flask-cors
