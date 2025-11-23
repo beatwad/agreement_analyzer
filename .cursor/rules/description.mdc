@@ -1,0 +1,53 @@
+---
+alwaysApply: true
+---
+
+# Agreement Analyzer
+
+A Chrome Extension that uses AI to analyze legal agreements, terms of service, and contracts. The extension identifies key points, potential red flags, and provides summaries of what users are agreeing to.
+
+## Architecture
+
+**Frontend**: Chrome Extension (Manifest V3) with context menu integration. Users can right-click on pages or links to trigger analysis. Results are displayed in a modal overlay.
+
+**Backend**: Python FastAPI server that handles:
+- Web scraping of linked pages using BeautifulSoup
+- Text extraction and preprocessing
+- LLM integration via LangChain
+- Support for multiple LLM providers (Gemini, OpenAI, Claude, Ollama)
+
+**AI Integration**: Uses LangChain for LLM orchestration with configurable model support. Defaults to Google Gemini but can be configured for other providers. Includes rate limiting for free-tier API usage.
+
+## Key Features
+
+- **Context Menu Analysis**: Right-click to analyze current page text or linked agreements
+- **URL Scraping**: Automatically scrapes and extracts text from linked pages without manual navigation
+- **Multi-LLM Support**: Configurable to work with Gemini, OpenAI, Claude, or Ollama
+- **BYOK (Bring Your Own Key)**: Users provide their own API keys via extension options page
+- **Modal UI**: Results displayed in a scrollable modal with markdown formatting support
+
+## Technical Stack
+
+- **Extension**: JavaScript, Chrome Extension Manifest V3, Chrome Storage API
+- **Backend**: Python 3.9+, FastAPI, Uvicorn, BeautifulSoup4, Requests
+- **AI**: LangChain, Google GenAI (default), with support for OpenAI, Anthropic, and Ollama
+- **Communication**: REST API between extension and backend (localhost:8000)
+
+## File Structure
+
+### Backend (`/backend`)
+- `server.py`: Main FastAPI application entry point. Handles API endpoints (`/analyze`), request validation, and CORS settings.
+- `llm.py`: Core AI logic. Contains the `AIAdapter` and model classes (Gemini, OpenAI, etc.) to interface with different LLM providers.
+- `prompts.py`: Stores system prompts and templates used to instruct the LLM on how to analyze agreements.
+- `config.py`: Configuration settings including model selection, temperature, and free tier limits.
+- `requirements.txt`: List of Python dependencies required to run the backend server.
+
+### Extension (`/extension`)
+- `manifest.json`: Chrome Extension configuration file defining permissions, background scripts, and UI elements.
+- `background.js`: Service worker script. Handles context menu creation, click events, communication with the backend, and injecting the results modal.
+- `options.html`: HTML interface for the extension settings page where users input their API keys.
+- `options.js`: Logic for saving and retrieving user settings (API keys) using `chrome.storage`.
+- `icon.png`: Extension icon used in the browser toolbar and management page.
+
+### Root
+- `README.md`: Project documentation, installation instructions, and usage guide.
