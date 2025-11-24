@@ -1,5 +1,5 @@
 // Create Context Menu Items
-const SERVER_URL = "https://<YOUR_TAILSCALE_FUNNEL_URL>"; // TODO: Replace with your Tailscale Funnel URL
+const SERVER_URL = "https://agreement-analyzer.tail0c4bb5.ts.net";
 // const SERVER_URL = "http://127.0.0.1:8001"; // Use this for local development
 
 chrome.runtime.onInstalled.addListener(() => {

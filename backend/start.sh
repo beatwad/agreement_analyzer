@@ -11,10 +11,9 @@ if [ ! -z "$TS_AUTHKEY" ]; then
     tailscale up --authkey=$TS_AUTHKEY --hostname=agreement-analyzer
 fi
 
-# Start serving the app via Tailscale Funnel
+# Start serving the app via Tailscale Funnel (Public Internet)
 # Pointing to localhost:8001 since we are in the same container now
-# Using new CLI syntax with --bg
-tailscale serve --bg --https=443 http://localhost:8001
+tailscale funnel --bg --https=443 http://localhost:8001
 
 # Start the FastAPI application
 uvicorn server:app --host 0.0.0.0 --port 8001
