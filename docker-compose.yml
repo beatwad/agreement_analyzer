@@ -8,14 +8,10 @@ services:
       - "8001"
     volumes:
       - ./backend:/app
-      - tailscale-data:/var/lib/tailscale
-      - /dev/net/tun:/dev/net/tun
-    environment:
-      - TS_AUTHKEY=${TS_AUTHKEY}
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
     restart: unless-stopped
 
-volumes:
-  tailscale-data:
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared_tunnel
+    restart: unless-stopped
+    command: tunnel --url http://backend:8001
