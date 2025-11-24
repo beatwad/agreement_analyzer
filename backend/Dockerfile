@@ -18,5 +18,5 @@ RUN chmod +x start.sh
 # Set environment variables
 EXPOSE 8001
 
-CMD ["./start.sh"]
+CMD ["/bin/bash", "./start.sh"]
 

@@ -13,7 +13,8 @@ fi
 
 # Start serving the app via Tailscale Funnel
 # Pointing to localhost:8001 since we are in the same container now
-tailscale serve https / http://localhost:8001 &
+# Using new CLI syntax with --bg
+tailscale serve --bg --https=443 http://localhost:8001
 
 # Start the FastAPI application
 uvicorn server:app --host 0.0.0.0 --port 8001
