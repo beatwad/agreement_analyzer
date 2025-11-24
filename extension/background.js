@@ -83,16 +83,34 @@ function showModal(message, isError) {
 
     // Create content area
     const content = document.createElement('div');
-    content.textContent = message;
+    // Use marked.parse if available, otherwise fallback to textContent
+    if (typeof marked !== 'undefined' && marked.parse) {
+        content.innerHTML = marked.parse(message);
+    } else {
+        content.textContent = message;
+    }
     content.style.cssText = `
         padding: 20px;
         overflow-y: auto;
         flex: 1;
         word-wrap: break-word;
-        white-space: pre-wrap;
         line-height: 1.6;
         color: ${isError ? '#d32f2f' : '#333'};
     `;
+
+    // Style markdown elements if using marked
+    if (typeof marked !== 'undefined') {
+        const style = document.createElement('style');
+        style.textContent = `
+            #agreement-analyzer-modal h1, #agreement-analyzer-modal h2, #agreement-analyzer-modal h3 { margin-top: 1em; margin-bottom: 0.5em; }
+            #agreement-analyzer-modal p { margin-bottom: 1em; }
+            #agreement-analyzer-modal ul, #agreement-analyzer-modal ol { padding-left: 20px; margin-bottom: 1em; }
+            #agreement-analyzer-modal li { margin-bottom: 0.5em; }
+            #agreement-analyzer-modal code { background: #f5f5f5; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
+            #agreement-analyzer-modal pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        `;
+        content.appendChild(style);
+    }
 
     container.appendChild(header);
     container.appendChild(content);
@@ -191,8 +209,13 @@ async function handleAnalysis(apiKey, text, url) {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
             chrome.scripting.executeScript({
                 target: { tabId: tabs[0].id },
-                func: showModal,
-                args: [data.result, false]
+                files: ['marked.min.js']
+            }, () => {
+                chrome.scripting.executeScript({
+                    target: { tabId: tabs[0].id },
+                    func: showModal,
+                    args: [data.result, false]
+                });
             });
         });
 
@@ -203,8 +226,13 @@ async function handleAnalysis(apiKey, text, url) {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
             chrome.scripting.executeScript({
                 target: { tabId: tabs[0].id },
-                func: showModal,
-                args: [error.message, true]
+                files: ['marked.min.js']
+            }, () => {
+                chrome.scripting.executeScript({
+                    target: { tabId: tabs[0].id },
+                    func: showModal,
+                    args: [error.message, true]
+                });
             });
         });
     }

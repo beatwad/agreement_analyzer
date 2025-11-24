@@ -68,7 +68,7 @@ class GeminiModel(AIModel):
         self.model = ChatGoogleGenerativeAI(**model_kwargs)
 
     def invoke(self, prompt: ChatPromptTemplate) -> BaseMessage:
-        prompt_messages = [SystemMessage(content=prompts.custom_instructions)] + prompt.messages
+        prompt_messages = [SystemMessage(content=prompts.system_role)] + prompt.messages
         # randomly select one proxy after another until LLM request succeeds
         response = self.model.invoke(prompt_messages)
         return response
@@ -94,7 +94,7 @@ class OpenAIModel(AIModel):
         )
 
     def invoke(self, prompt: ChatPromptTemplate) -> BaseMessage:
-        prompt_messages = [SystemMessage(content=prompts.custom_instructions)] + prompt.messages
+        prompt_messages = [SystemMessage(content=prompts.system_role)] + prompt.messages
         response = self.model.invoke(prompt_messages)
         return response
 

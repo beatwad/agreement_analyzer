@@ -8,3 +8,4 @@ beautifulsoup4
 requests
 pydantic
 flask-cors
+playwright

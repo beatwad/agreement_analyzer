@@ -1,12 +1,13 @@
 from typing import Optional
 
 import uvicorn
-import requests
 from bs4 import BeautifulSoup
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from playwright.async_api import async_playwright
 from llm import GPTAnswerer
+import code
 
 app = FastAPI()
 
@@ -25,11 +26,24 @@ class AnalysisRequest(BaseModel):
     url: Optional[str] = None
 
 
-def extract_text_from_url(url):
+async def extract_text_from_url(url):
     try:
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-        response = requests.get(url, headers=headers, timeout=10)
-        soup = BeautifulSoup(response.content, "html.parser")
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            page = await browser.new_page(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            )
+
+            try:
+                await page.goto(url, wait_until="networkidle", timeout=30000)
+            except Exception:
+                # If networkidle times out, we still might have useful content
+                pass
+
+            content = await page.content()
+            await browser.close()
+
+        soup = BeautifulSoup(content, "html.parser")
 
         # Remove script and style elements
         for script in soup(["script", "style", "header", "footer", "nav"]):
@@ -37,6 +51,7 @@ def extract_text_from_url(url):
 
         text = soup.get_text()
         # Clean up whitespace
+        code.interact(local=dict(globals(), **locals()))
         lines = (line.strip() for line in text.splitlines())
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
         return "\n".join(chunk for chunk in chunks if chunk)
@@ -46,15 +61,13 @@ def extract_text_from_url(url):
 
 @app.post("/analyze")
 async def analyze_agreement(request: AnalysisRequest):
-    print(request)
-
     if not request.api_key:
         raise HTTPException(status_code=401, detail="API Key missing")
 
     # 1. Determine Source (URL scrape vs Raw Text)
     content_to_analyze = request.text
     if request.url:
-        content_to_analyze = extract_text_from_url(request.url)
+        content_to_analyze = await extract_text_from_url(request.url)
 
     if not content_to_analyze or len(content_to_analyze) < 50:
         raise HTTPException(status_code=400, detail="Not enough text found to analyze.")
