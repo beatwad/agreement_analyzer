@@ -159,11 +159,12 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         }
 
         const apiKey = result.geminiKey;
-        const serverUrl = "http://104.164.54.196:8001";
+        // const serverUrl = "http://104.164.54.196:8001";
+        const serverUrl = "http://127.0.0.1:8000";
 
         if (info.menuItemId === "analyze-link") {
             // Scenario 1: Link Analysis (Send URL to Python)
-            handleAnalysis(apiKey, serverUrl, null, info.linkUrl);
+            handleAnalysis(apiKey, serverUrl, null, info.linkUrl, tab.id);
         } 
         else if (info.menuItemId === "analyze-page") {
             // Scenario 2: Page Analysis (Extract text via Scripting)
@@ -172,14 +173,14 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
                 func: () => document.body.innerText
             }, (results) => {
                 if (results && results[0]) {
-                    handleAnalysis(apiKey, serverUrl, results[0].result, null);
+                    handleAnalysis(apiKey, serverUrl, results[0].result, null, tab.id);
                 }
             });
         }
     });
 });
 
-async function handleAnalysis(apiKey, serverUrl, text, url) {
+async function handleAnalysis(apiKey, serverUrl, text, url, tabId) {
     try {
         console.log("Sending request with Key:", apiKey ? "Yes" : "No"); // Debug log
         console.log("Target Server:", serverUrl);
@@ -208,34 +209,34 @@ async function handleAnalysis(apiKey, serverUrl, text, url) {
         }
 
         // Success - Show result in modal
-        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-            chrome.scripting.executeScript({
-                target: { tabId: tabs[0].id },
-                files: ['marked.min.js']
-            }, () => {
-                chrome.scripting.executeScript({
-                    target: { tabId: tabs[0].id },
-                    func: showModal,
-                    args: [data.result, false]
-                });
-            });
+        await chrome.scripting.executeScript({
+            target: { tabId: tabId },
+            files: ['marked.min.js']
+        });
+        
+        await chrome.scripting.executeScript({
+            target: { tabId: tabId },
+            func: showModal,
+            args: [data.result, false]
         });
 
     } catch (error) {
         console.error("Analysis Failed:", error);
         
         // Show error in modal
-        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-            chrome.scripting.executeScript({
-                target: { tabId: tabs[0].id },
+        try {
+            await chrome.scripting.executeScript({
+                target: { tabId: tabId },
                 files: ['marked.min.js']
-            }, () => {
-                chrome.scripting.executeScript({
-                    target: { tabId: tabs[0].id },
-                    func: showModal,
-                    args: [error.message, true]
-                });
             });
-        });
+            
+            await chrome.scripting.executeScript({
+                target: { tabId: tabId },
+                func: showModal,
+                args: [error.message, true]
+            });
+        } catch (uiError) {
+            console.error("Failed to show error modal:", uiError);
+        }
     }
 }
