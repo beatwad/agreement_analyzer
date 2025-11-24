@@ -66,6 +66,21 @@ agreement-analyzer/
     ```
     *The server will run at `http://127.0.0.1:8000`.*
 
+#### Alternative: Run with Docker
+
+1.  Navigate to the `backend` folder:
+    ```bash
+    cd backend
+    ```
+2.  Build the image:
+    ```bash
+    docker build -t agreement-analyzer .
+    ```
+3.  Run the container:
+    ```bash
+    docker run -p 8000:8000 agreement-analyzer
+    ```
+
 ### 2. Extension Setup (Chrome)
 
 1.  Open Chrome and navigate to `chrome://extensions/`.

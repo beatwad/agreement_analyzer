@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from playwright.async_api import async_playwright
 from llm import GPTAnswerer
-import code
+from config import PORT
 
 app = FastAPI()
 
@@ -51,7 +51,6 @@ async def extract_text_from_url(url):
 
         text = soup.get_text()
         # Clean up whitespace
-        code.interact(local=dict(globals(), **locals()))
         lines = (line.strip() for line in text.splitlines())
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
         return "\n".join(chunk for chunk in chunks if chunk)
@@ -87,4 +86,4 @@ def read_root():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=PORT)

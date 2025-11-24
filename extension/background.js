@@ -150,7 +150,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-    // Get API Key first
+    // Get API Key
     chrome.storage.sync.get(['geminiKey'], (result) => {
         if (!result.geminiKey) {
             alert("Please set your Gemini API Key in the extension settings.");
@@ -159,10 +159,11 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         }
 
         const apiKey = result.geminiKey;
+        const serverUrl = "http://104.164.54.196:8001";
 
         if (info.menuItemId === "analyze-link") {
             // Scenario 1: Link Analysis (Send URL to Python)
-            handleAnalysis(apiKey, null, info.linkUrl);
+            handleAnalysis(apiKey, serverUrl, null, info.linkUrl);
         } 
         else if (info.menuItemId === "analyze-page") {
             // Scenario 2: Page Analysis (Extract text via Scripting)
@@ -171,18 +172,19 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
                 func: () => document.body.innerText
             }, (results) => {
                 if (results && results[0]) {
-                    handleAnalysis(apiKey, results[0].result, null);
+                    handleAnalysis(apiKey, serverUrl, results[0].result, null);
                 }
             });
         }
     });
 });
 
-async function handleAnalysis(apiKey, text, url) {
+async function handleAnalysis(apiKey, serverUrl, text, url) {
     try {
         console.log("Sending request with Key:", apiKey ? "Yes" : "No"); // Debug log
+        console.log("Target Server:", serverUrl);
 
-        const response = await fetch("http://127.0.0.1:8000/analyze", {
+        const response = await fetch(`${serverUrl}/analyze`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
