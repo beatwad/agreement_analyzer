@@ -1,4 +1,7 @@
 // Create Context Menu Items
+const SERVER_URL = "https://<YOUR_TAILSCALE_FUNNEL_URL>"; // TODO: Replace with your Tailscale Funnel URL
+// const SERVER_URL = "http://127.0.0.1:8001"; // Use this for local development
+
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: "analyze-page",
@@ -22,12 +25,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         }
 
         const apiKey = result.geminiKey;
-        // const serverUrl = "http://104.164.54.196:8001";
-        const serverUrl = "http://127.0.0.1:8000";
-
+        
         if (info.menuItemId === "analyze-link") {
             // Scenario 1: Link Analysis (Send URL to Python)
-            handleAnalysis(apiKey, serverUrl, null, info.linkUrl);
+            handleAnalysis(apiKey, SERVER_URL, null, info.linkUrl);
         } 
         else if (info.menuItemId === "analyze-page") {
             // Scenario 2: Page Analysis (Extract text via Scripting)
@@ -36,7 +37,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
                 func: () => document.body.innerText
             }, (results) => {
                 if (results && results[0]) {
-                    handleAnalysis(apiKey, serverUrl, results[0].result, null);
+                    handleAnalysis(apiKey, SERVER_URL, results[0].result, null);
                 }
             });
         }
