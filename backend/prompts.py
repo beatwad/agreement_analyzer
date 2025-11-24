@@ -20,7 +20,9 @@ Analyze the text below for "red flags"—clauses that pose significant risk, lia
 3. **Markdown Format:** Use bullet points and bold text.
 
 ### Structure of the Output:
-Do not use English headers unless the input text is in English. Translate the following concepts into the detected language and use them as headers:
+Do not use English headers unless the input text is in English. 
+If the text does not contain any agreement, just write that no agreement was found in the language of the input text.
+Else, analyze the agreement, translate the following concepts into the detected language and use them as headers:
 
 - **[Header 1: Equivalent of "Executive Summary"]**: A 1-sentence overview of risk.
 - **[Header 2: Equivalent of "Critical Red Flags"]**: The most dangerous clauses.
