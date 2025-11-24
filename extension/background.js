@@ -1,6 +1,5 @@
 // Create Context Menu Items
-const SERVER_URL = "https://<YOUR_CLOUDFLARE_QUICK_TUNNEL_URL>"; // TODO: Check docker logs to find your random URL (e.g., https://xyz.trycloudflare.com)
-// const SERVER_URL = "http://127.0.0.1:8001"; // Use this for local development
+const SERVER_URL = " https://remain-korean-kelkoo-bargain.trycloudflare.com";
 
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
