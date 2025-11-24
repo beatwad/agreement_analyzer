@@ -13,7 +13,13 @@ from langchain_core.prompts import ChatPromptTemplate
 from google.genai import types
 
 import prompts
-from config import LLM_MODEL, FREE_TIER, FREE_TIER_RPM_LIMIT, LLM_MODEL_TYPE, TEMPERATURE
+from config import (
+    LLM_MODEL,
+    FREE_TIER,
+    FREE_TIER_RPM_LIMIT,
+    LLM_MODEL_TYPE,
+    TEMPERATURE,
+)
 
 
 def pause(low: int = 1, high: int = 2) -> None:
