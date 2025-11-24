@@ -17,7 +17,7 @@ from config import (
     LLM_MODEL,
     FREE_TIER,
     FREE_TIER_RPM_LIMIT,
-    LLM_MODEL_TYPE,
+    llm_model_provider,
     TEMPERATURE,
 )
 
@@ -138,7 +138,7 @@ class AIAdapter:
     """Class for accessing LLM models from different companies via API"""
 
     def __init__(self, api_key: str, llm_proxy: str, llm_api_url: str = None):
-        self.model_type = LLM_MODEL_TYPE
+        self.model_provider = llm_model_provider
         self.llm_model = LLM_MODEL
         self.free_tier = FREE_TIER
         self.free_tier_rpm_limit = FREE_TIER_RPM_LIMIT
@@ -146,16 +146,16 @@ class AIAdapter:
         self.model = self._create_model(api_key, llm_proxy, llm_api_url)
 
     def _create_model(self, api_key: str, llm_proxy: str, llm_api_url: str) -> AIModel:
-        if self.model_type == "gemini":
+        if self.model_provider == "gemini":
             return GeminiModel(api_key, self.llm_model, llm_proxy)
-        elif self.model_type == "openai":
+        elif self.model_provider == "openai":
             return OpenAIModel(api_key, self.llm_model, llm_proxy)
-        elif self.model_type == "claude":
+        elif self.model_provider == "claude":
             return ClaudeModel(api_key, self.llm_model)
-        elif self.model_type == "ollama":
+        elif self.model_provider == "ollama":
             return OllamaModel(self.llm_model, llm_api_url)
         else:
-            raise ValueError(f"Unsupported model type: {LLM_MODEL_TYPE}")
+            raise ValueError(f"Unsupported model type: {llm_model_provider}")
 
     def invoke(self, prompt: str) -> str:
         if self.free_tier:

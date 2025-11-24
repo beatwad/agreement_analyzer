@@ -1,7 +1,7 @@
 LLM_MODEL = "gemini-2.0-flash"
 FREE_TIER = True
 FREE_TIER_RPM_LIMIT = 15
-LLM_MODEL_TYPE = "gemini"
+llm_model_provider = "gemini"
 TEMPERATURE = 0.4
 
 # Server Configuration

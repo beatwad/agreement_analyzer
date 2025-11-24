@@ -7,6 +7,7 @@ A Google Chrome Extension that uses AI to analyze text or link to Terms of Servi
 *   **Analyze Page:** Right-click anywhere on a page to analyze the visible text.
 *   **Analyze Link:** Right-click a link (e.g., "Terms of Service") to scrape that URL and analyze its content without visiting it manually.
 *   **AI Summaries:** Uses LLM to highlight key points, red flags, and summaries.
+*   **Multi-Model Support:** Works with Google Gemini (default), OpenAI, Claude (Anthropic), and Ollama (local LLMs).
 *   **BYOK (Bring Your Own Key):** Securely input your own Google Gemini API Key in the extension settings.
 
 ## 🛠️ Tech Stack
@@ -64,22 +65,23 @@ agreement-analyzer/
     # Option B: Using Uvicorn directly (recommended for dev)
     uvicorn server:app --reload
     ```
-    *The server will run at `http://127.0.0.1:8000`.*
+    *The server will run at `http://127.0.0.1:8001`.*
 
-#### Alternative: Run with Docker
+#### Alternative: Run with Docker Compose
 
-1.  Navigate to the `backend` folder:
+1.  Navigate to the project root:
     ```bash
-    cd backend
+    cd agreement-analyzer
     ```
-2.  Build the image:
+2.  Create a `.env` file (optional, defaults to port 8001):
+    ```env
+    SERVER_PORT=8001
+    ```
+3.  Start the service:
     ```bash
-    docker build -t agreement-analyzer .
+    docker-compose up --build -d
     ```
-3.  Run the container:
-    ```bash
-    docker run -p 8000:8000 agreement-analyzer
-    ```
+    *The server will run at `http://localhost:8001` (or your configured port).*
 
 ### 2. Extension Setup (Chrome)
 
@@ -109,7 +111,7 @@ Wait a few seconds (depending on the length of the text). An alert popup will ap
 ## 🔧 Troubleshooting
 
 **Error: "Failed to fetch"**
-*   Ensure the Python server is running (`http://127.0.0.1:8000`).
+*   Ensure the Python server is running (`http://127.0.0.1:8001` or your configured IP/Port).
 *   Check if your firewall is blocking the connection.
 
 **Error: "400 Not enough text found"**
