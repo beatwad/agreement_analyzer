@@ -4,25 +4,14 @@ services:
   backend:
     build: ./backend
     container_name: agreement_analyzer_backend
-    # ports:
-    #   - "8001:8001"
     expose:
       - "8001"
     volumes:
       - ./backend:/app
-    restart: unless-stopped
-
-  tailscale:
-    image: tailscale/tailscale:latest
-    container_name: tailscale_funnel
-    hostname: agreement-analyzer
-    environment:
-      - TS_AUTHKEY=${TS_AUTHKEY}
-      - TS_STATE_DIR=/var/lib/tailscale
-      - TS_EXTRA_ARGS=--advertise-tags=tag:container
-    volumes:
       - tailscale-data:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
     cap_add:
       - NET_ADMIN
       - NET_RAW
