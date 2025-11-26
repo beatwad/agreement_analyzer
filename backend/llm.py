@@ -13,13 +13,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from google.genai import types
 
 import prompts
-from config import (
-    LLM_MODEL,
-    FREE_TIER,
-    FREE_TIER_RPM_LIMIT,
-    llm_model_provider,
-    TEMPERATURE,
-)
 
 
 def pause(low: int = 1, high: int = 2) -> None:
@@ -40,7 +33,7 @@ class AIModel(ABC):
 class GeminiModel(AIModel):
     """Get access to Gemini model"""
 
-    def __init__(self, api_key: str, llm_model: str, llm_proxy: str) -> None:
+    def __init__(self, api_key: str, llm_model: str, llm_proxy: str, temperature: float) -> None:
         from langchain_google_genai import ChatGoogleGenerativeAI, HarmBlockThreshold, HarmCategory
 
         self.google_api_key = api_key
@@ -49,7 +42,7 @@ class GeminiModel(AIModel):
         model_kwargs = {
             "model": llm_model,
             "google_api_key": self.google_api_key,
-            "temperature": TEMPERATURE,
+            "temperature": temperature,
             "safety_settings": {
                 HarmCategory.HARM_CATEGORY_UNSPECIFIED: HarmBlockThreshold.BLOCK_NONE,
                 HarmCategory.HARM_CATEGORY_DEROGATORY: HarmBlockThreshold.BLOCK_NONE,
@@ -83,7 +76,9 @@ class GeminiModel(AIModel):
 class OpenAIModel(AIModel):
     """Get access to OpenAI model"""
 
-    def __init__(self, api_key: str, llm_model: str, llm_proxy: str = None) -> None:
+    def __init__(
+        self, api_key: str, llm_model: str, llm_proxy: str = None, temperature: float = 0.4
+    ) -> None:
         from langchain_openai import ChatOpenAI
 
         self.llm_proxy = llm_proxy
@@ -93,7 +88,7 @@ class OpenAIModel(AIModel):
             model_name=self.model_name,
             openai_api_key=self.openai_api_key,
             openai_proxy=self.llm_proxy,
-            temperature=TEMPERATURE,
+            temperature=temperature,
             presence_penalty=0,
             frequency_penalty=0,
             timeout=60,
@@ -108,10 +103,10 @@ class OpenAIModel(AIModel):
 class ClaudeModel(AIModel):
     """Get access to Claude model"""
 
-    def __init__(self, api_key: str, llm_model: str) -> None:
+    def __init__(self, api_key: str, llm_model: str, temperature: float) -> None:
         from langchain_anthropic import ChatAnthropic
 
-        self.model = ChatAnthropic(model=llm_model, api_key=api_key, temperature=TEMPERATURE)
+        self.model = ChatAnthropic(model=llm_model, api_key=api_key, temperature=temperature)
 
     def invoke(self, prompt: str) -> BaseMessage:
         response = self.model.invoke(prompt)
@@ -137,25 +132,47 @@ class OllamaModel(AIModel):
 class AIAdapter:
     """Class for accessing LLM models from different companies via API"""
 
-    def __init__(self, api_key: str, llm_proxy: str, llm_api_url: str = None):
-        self.model_provider = llm_model_provider
-        self.llm_model = LLM_MODEL
-        self.free_tier = FREE_TIER
-        self.free_tier_rpm_limit = FREE_TIER_RPM_LIMIT
+    def __init__(
+        self,
+        api_key: str,
+        llm_proxy: str,
+        llm_provider: str,
+        llm_model: str,
+        temperature: float,
+        free_tier: bool,
+        free_tier_rpm_limit: int,
+        llm_api_url: str = None,
+    ):
+        self.model_provider = llm_provider
+        self.llm_model = llm_model
+        self.temperature = temperature
+        self.free_tier = free_tier
+        self.free_tier_rpm_limit = free_tier_rpm_limit
         self.free_tier_request_queue = deque(maxlen=self.free_tier_rpm_limit)
         self.model = self._create_model(api_key, llm_proxy, llm_api_url)
 
     def _create_model(self, api_key: str, llm_proxy: str, llm_api_url: str) -> AIModel:
-        if self.model_provider == "gemini":
-            return GeminiModel(api_key, self.llm_model, llm_proxy)
-        elif self.model_provider == "openai":
-            return OpenAIModel(api_key, self.llm_model, llm_proxy)
-        elif self.model_provider == "claude":
-            return ClaudeModel(api_key, self.llm_model)
-        elif self.model_provider == "ollama":
+        if self.model_provider == "Gemini":
+            return GeminiModel(api_key, self.llm_model, llm_proxy, self.temperature)
+        elif self.model_provider == "OpenAI":
+            return OpenAIModel(api_key, self.llm_model, llm_proxy, self.temperature)
+        elif self.model_provider == "Claude":
+            return ClaudeModel(api_key, self.llm_model, self.temperature)
+        elif self.model_provider == "Ollama":
             return OllamaModel(self.llm_model, llm_api_url)
         else:
-            raise ValueError(f"Unsupported model type: {llm_model_provider}")
+            # Fallback or error for unknown provider, trying lower case match if needed
+            provider_lower = self.model_provider.lower()
+            if provider_lower == "gemini":
+                return GeminiModel(api_key, self.llm_model, llm_proxy, self.temperature)
+            elif provider_lower == "openai":
+                return OpenAIModel(api_key, self.llm_model, llm_proxy, self.temperature)
+            elif provider_lower == "claude":
+                return ClaudeModel(api_key, self.llm_model, self.temperature)
+            elif provider_lower == "ollama":
+                return OllamaModel(self.llm_model, llm_api_url)
+
+            raise ValueError(f"Unsupported model type: {self.model_provider}")
 
     def invoke(self, prompt: str) -> str:
         if self.free_tier:
@@ -195,9 +212,20 @@ class GPTAnswerer:
     as well as writing cover letters.
     """
 
-    def __init__(self, llm_api_key: str, llm_proxy: str):
+    def __init__(
+        self,
+        api_key: str,
+        llm_proxy: str,
+        llm_provider: str,
+        llm_model: str,
+        temperature: float,
+        free_tier: bool,
+        free_tier_rpm_limit: int,
+    ):
         self.job = None
-        self.ai_adapter = AIAdapter(llm_api_key, llm_proxy)
+        self.ai_adapter = AIAdapter(
+            api_key, llm_proxy, llm_provider, llm_model, temperature, free_tier, free_tier_rpm_limit
+        )
         self.llm_cheap = LoggerChatModel(self.ai_adapter)
         self.chains = {
             "analyze_agreement": self._create_chain(prompts.analyze_agreement_prompt),

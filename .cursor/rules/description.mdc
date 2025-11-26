@@ -8,10 +8,10 @@ A Chrome Extension that uses AI to analyze legal agreements, terms of service, a
 
 ## Architecture
 
-**Frontend**: Chrome Extension (Manifest V3) with context menu integration. Users can right-click on pages or links to trigger analysis. Results are displayed in a modal overlay.
+**Frontend**: Chrome Extension (Manifest V3) with context menu integration. Users can right-click on pages or links to trigger analysis. Results are displayed in a dedicated new tab (`result.html`) for better readability.
 
 **Backend**: Python FastAPI server that handles:
-- Web scraping of linked pages using BeautifulSoup
+- Web scraping of linked pages using Playwright (for dynamic content) and BeautifulSoup (for parsing)
 - Text extraction and preprocessing
 - LLM integration via LangChain
 - Support for multiple LLM providers (Gemini, OpenAI, Claude, Ollama)
@@ -21,30 +21,33 @@ A Chrome Extension that uses AI to analyze legal agreements, terms of service, a
 ## Key Features
 
 - **Context Menu Analysis**: Right-click to analyze current page text or linked agreements
-- **URL Scraping**: Automatically scrapes and extracts text from linked pages without manual navigation
+- **URL Scraping**: Automatically scrapes and extracts text from linked pages using Playwright to handle dynamic content
 - **Multi-LLM Support**: Configurable to work with Gemini, OpenAI, Claude, or Ollama
 - **BYOK (Bring Your Own Key)**: Users provide their own API keys via extension options page
-- **Modal UI**: Results displayed in a scrollable modal with markdown formatting support
+- **Dedicated Results Tab**: Results displayed in a full-page view with markdown formatting support
 
 ## Technical Stack
 
-- **Extension**: JavaScript, Chrome Extension Manifest V3, Chrome Storage API
-- **Backend**: Python 3.9+, FastAPI, Uvicorn, BeautifulSoup4, Requests
+- **Extension**: JavaScript, Chrome Extension Manifest V3, Chrome Storage API, marked.js (for Markdown rendering)
+- **Backend**: Python 3.9+, FastAPI, Uvicorn, Playwright, BeautifulSoup4, Requests
 - **AI**: LangChain, Google GenAI (default), with support for OpenAI, Anthropic, and Ollama
-- **Communication**: REST API between extension and backend (localhost:8000)
+- **Communication**: REST API between extension and backend (localhost:8001)
 
 ## File Structure
 
 ### Backend (`/backend`)
-- `server.py`: Main FastAPI application entry point. Handles API endpoints (`/analyze`), request validation, and CORS settings.
+- `server.py`: Main FastAPI application entry point. Handles API endpoints (`/analyze`), Playwright scraping logic, request validation, and CORS settings.
 - `llm.py`: Core AI logic. Contains the `AIAdapter` and model classes (Gemini, OpenAI, etc.) to interface with different LLM providers.
 - `prompts.py`: Stores system prompts and templates used to instruct the LLM on how to analyze agreements.
-- `config.py`: Configuration settings including model selection, temperature, and free tier limits.
 - `requirements.txt`: List of Python dependencies required to run the backend server.
+- `Dockerfile`: Container configuration for the backend service.
 
 ### Extension (`/extension`)
 - `manifest.json`: Chrome Extension configuration file defining permissions, background scripts, and UI elements.
-- `background.js`: Service worker script. Handles context menu creation, click events, communication with the backend, and injecting the results modal.
+- `background.js`: Service worker script. Handles context menu creation, click events, communication with the backend, and creating the results tab.
+- `result.html`: The HTML template for the results tab where analysis is displayed.
+- `result.js`: Handles receiving the analysis result from the background script and rendering it.
+- `marked.min.js`: Library for rendering Markdown content in the results page.
 - `options.html`: HTML interface for the extension settings page where users input their API keys.
 - `options.js`: Logic for saving and retrieving user settings (API keys) using `chrome.storage`.
 - `icon.png`: Extension icon used in the browser toolbar and management page.

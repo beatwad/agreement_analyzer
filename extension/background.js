@@ -1,6 +1,6 @@
 // Create Context Menu Items
-const SERVER_URL = "https://<YOUR_CLOUDFLARE_QUICK_TUNNEL_URL>"; // TODO: Check docker logs to find your random URL (e.g., https://xyz.trycloudflare.com)
-// const SERVER_URL = "http://127.0.0.1:8001"; // Use this for local development
+//const SERVER_URL = "https://<YOUR_CLOUDFLARE_QUICK_TUNNEL_URL>"; // TODO: Check docker logs to find your random URL (e.g., https://xyz.trycloudflare.com)
+const SERVER_URL = "http://127.0.0.1:8001"; // Use this for local development
 
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
@@ -16,19 +16,33 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-    // Get API Key
-    chrome.storage.sync.get(['geminiKey'], (result) => {
+    // Get Settings
+    chrome.storage.sync.get({
+        geminiKey: '',
+        modelProvider: 'Gemini',
+        modelName: 'gemini-2.0-flash',
+        temperature: 0.4,
+        freeTier: true,
+        rpmLimit: 15
+    }, (result) => {
         if (!result.geminiKey) {
-            alert("Please set your Gemini API Key in the extension settings.");
+            alert("Please set your API Key in the extension settings.");
             chrome.runtime.openOptionsPage();
             return;
         }
 
-        const apiKey = result.geminiKey;
+        const config = {
+            apiKey: result.geminiKey,
+            modelProvider: result.modelProvider,
+            modelName: result.modelName,
+            temperature: result.temperature,
+            freeTier: result.freeTier,
+            rpmLimit: result.rpmLimit
+        };
         
         if (info.menuItemId === "analyze-link") {
             // Scenario 1: Link Analysis (Send URL to Python)
-            handleAnalysis(apiKey, SERVER_URL, null, info.linkUrl);
+            handleAnalysis(config, SERVER_URL, null, info.linkUrl);
         } 
         else if (info.menuItemId === "analyze-page") {
             // Scenario 2: Page Analysis (Extract text via Scripting)
@@ -37,14 +51,14 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
                 func: () => document.body.innerText
             }, (results) => {
                 if (results && results[0]) {
-                    handleAnalysis(apiKey, SERVER_URL, results[0].result, null);
+                    handleAnalysis(config, SERVER_URL, results[0].result, null);
                 }
             });
         }
     });
 });
 
-async function handleAnalysis(apiKey, serverUrl, text, url) {
+async function handleAnalysis(config, serverUrl, text, url) {
     // Open result tab immediately
     let resultTab;
     try {
@@ -55,7 +69,7 @@ async function handleAnalysis(apiKey, serverUrl, text, url) {
     }
 
     try {
-        console.log("Sending request with Key:", apiKey ? "Yes" : "No"); // Debug log
+        console.log("Sending request with Key:", config.apiKey ? "Yes" : "No"); // Debug log
         console.log("Target Server:", serverUrl);
 
         const response = await fetch(`${serverUrl}/analyze`, {
@@ -64,9 +78,14 @@ async function handleAnalysis(apiKey, serverUrl, text, url) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                api_key: apiKey,
+                api_key: config.apiKey,
                 text: text,
-                url: url
+                url: url,
+                llm_model: config.modelName,
+                llm_model_provider: config.modelProvider,
+                temperature: config.temperature,
+                free_tier: config.freeTier,
+                free_tier_rpm_limit: config.rpmLimit
             })
         });
 
