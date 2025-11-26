@@ -63,7 +63,7 @@ async def extract_text_from_url(url):
 
 
 @app.post("/analyze")
-async def analyze_agreement(request: AnalysisRequest):
+async def analyze(request: AnalysisRequest):
     if not request.api_key:
         raise HTTPException(status_code=401, detail="API Key missing")
 
