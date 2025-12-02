@@ -7,7 +7,6 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from playwright.async_api import async_playwright
 from llm import GPTAnswerer
-from config import PORT
 
 app = FastAPI()
 
@@ -24,6 +23,11 @@ class AnalysisRequest(BaseModel):
     api_key: str
     text: Optional[str] = None
     url: Optional[str] = None
+    llm_model: str = "gemini-2.0-flash"
+    llm_model_provider: str = "Gemini"
+    temperature: float = 0.4
+    free_tier: bool = True
+    free_tier_rpm_limit: int = 15
 
 
 async def extract_text_from_url(url):
@@ -59,7 +63,7 @@ async def extract_text_from_url(url):
 
 
 @app.post("/analyze")
-async def analyze_agreement(request: AnalysisRequest):
+async def analyze(request: AnalysisRequest):
     if not request.api_key:
         raise HTTPException(status_code=401, detail="API Key missing")
 
@@ -72,7 +76,15 @@ async def analyze_agreement(request: AnalysisRequest):
         raise HTTPException(status_code=400, detail="Not enough text found to analyze.")
 
     try:
-        gpt_answerer = GPTAnswerer(request.api_key, "")
+        gpt_answerer = GPTAnswerer(
+            api_key=request.api_key,
+            llm_proxy="",
+            llm_provider=request.llm_model_provider,
+            llm_model=request.llm_model,
+            temperature=request.temperature,
+            free_tier=request.free_tier,
+            free_tier_rpm_limit=request.free_tier_rpm_limit,
+        )
         response = gpt_answerer.analyze_agreement(content_to_analyze)
         return {"result": response}
 
@@ -86,4 +98,4 @@ def read_root():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=PORT)
+    uvicorn.run(app, host="0.0.0.0", port=8001)
