@@ -23,9 +23,9 @@ Analyze the text below for "red flags"—clauses that pose significant risk, lia
 If the text does not contain any agreement, just write that no agreement was found in the target language.
 Else, analyze the agreement, translate the following concepts into the target language and use them as headers:
 
-- **[Header 1: Equivalent of "Executive Summary"]**: A 1-sentence overview of risk.
-- **[Header 2: Equivalent of "Critical Red Flags"]**: The most dangerous clauses.
-- **[Header 3: Equivalent of "Minor Concerns"]**: Lower priority risks.
+- **Header 1: Equivalent of "Executive Summary"**: A 1-sentence overview of risk.
+- **Header 2: Equivalent of "Critical Red Flags"**: The most dangerous clauses.
+- **Header 3: Equivalent of "Minor Concerns"**: Lower priority risks.
 
 TEXT TO ANALYZE:
 {text}
