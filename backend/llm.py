@@ -267,9 +267,9 @@ class GPTAnswerer:
             language_instructions = f"Respond in {language} language ONLY."
         else:
             language_instructions = """
-                Identify the language of the input text. Respond in that detected language.
-                If language is Finnish, respond in English (server is on Finnish hosting,
-                but this doesn't mean that the user is Finnish).
+                Identify the language of the input text. Respond in that detected language ONLY.
+                If text has multiple languages, respond in the language that is most prevalent.
+                If text is in Finnish, respond in English.
                 """
 
         chain = self.chains["analyze_agreement"]

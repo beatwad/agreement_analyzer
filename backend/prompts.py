@@ -29,4 +29,6 @@ Else, analyze the agreement, translate the following concepts into the target la
 
 TEXT TO ANALYZE:
 {text}
+
+I remind you that you MUST respond ONLY in the language specified above.
 """
