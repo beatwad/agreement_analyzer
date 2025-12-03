@@ -264,7 +264,7 @@ class GPTAnswerer:
         """
         logger.info(f"Analyzing agreement. Text length: {len(text)}")
         if language:
-            language_instructions = f"Respond in {language}."
+            language_instructions = f"Respond in {language} language ONLY."
         else:
             language_instructions = """
                 Identify the language of the input text. Respond in that detected language.
@@ -275,7 +275,7 @@ class GPTAnswerer:
         chain = self.chains["analyze_agreement"]
         logger.debug("Invoking analysis chain")
         logger.debug(f"Language instructions: {language_instructions}")
-        logger.debug(f"Text:\n{text}")
+        logger.debug(f"Text:\n{text[:1000]}")
         output = chain.invoke({"text": text, "language_instructions": language_instructions})
         logger.info("Analysis chain execution completed")
         return output

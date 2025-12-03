@@ -1,5 +1,5 @@
 // Create Context Menu Items
-const SERVER_URL = "https://looking-thus-costs-istanbul.trycloudflare.com";
+const SERVER_URL = "https://deleted-job-floating-uri.trycloudflare.com";
 // const SERVER_URL = "http://127.0.0.1:8001"; // Use this for local development
 
 chrome.runtime.onInstalled.addListener(() => {
