@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agreement-analyzer"
+version = "0.1.0"
+description = "A Chrome Extension backend that uses AI to analyze text or link to Terms of Service/User Agreement/Contract and finds the real and potential red flags in it."
+readme = "../README.md"
+requires-python = ">=3.13"
+license = {text = "MIT"}
+authors = [
+  {name = "Alex", email = "beatwad@gmail.com"}
+]
+dependencies = [
+    "beautifulsoup4>=4.14.2",
+    "fastapi>=0.122.0",
+    "flask-cors>=6.0.1",
+    "google-genai>=1.52.0",
+    "langchain>=1.1.0",
+    "langchain-anthropic>=1.2.0",
+    "langchain-core>=1.1.0",
+    "langchain-google-genai>=3.2.0",
+    "langchain-ollama>=1.0.0",
+    "langchain-openai>=1.1.0",
+    "playwright>=1.56.0",
+    "pydantic>=2.12.4",
+    "python-dotenv>=1.2.1",
+    "requests>=2.32.5",
+    "uvicorn>=0.38.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/beatwad/agreement_analyzer"
+"Bug Tracker" = "https://github.com/beatwad/agreement_analyzer/issues"
+
