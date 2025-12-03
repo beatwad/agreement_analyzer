@@ -32,14 +32,39 @@ class AnalysisRequest(BaseModel):
     free_tier_rpm_limit: int = 15
 
 
-async def extract_text_from_url(url):
+LANGUAGE_TO_LOCALE = {
+    "English": "en-US",
+    "Russian": "ru-RU",
+    "French": "fr-FR",
+    "Spanish": "es-ES",
+    "German": "de-DE",
+    "Italian": "it-IT",
+    "Portuguese": "pt-BR",
+    "Chinese": "zh-CN",
+    "Japanese": "ja-JP",
+    "Korean": "ko-KR",
+}
+
+
+async def extract_text_from_url(url, language: Optional[str] = ""):
     logger.info(f"Starting text extraction from URL: {url}")
+
+    locale_option = None
+    if language:
+        locale_option = LANGUAGE_TO_LOCALE.get(language, language)
+        logger.info(f"Using locale: {locale_option} for language: {language}")
+
     try:
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page(
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-            )
+
+            context_args = {
+                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+            if locale_option:
+                context_args["locale"] = locale_option
+
+            page = await browser.new_page(**context_args)
 
             try:
                 await page.goto(url, wait_until="networkidle", timeout=30000)
@@ -79,7 +104,7 @@ async def analyze(request: AnalysisRequest):
     content_to_analyze = request.text
     if request.url:
         logger.info(f"Scraping content from URL: {request.url}")
-        content_to_analyze = await extract_text_from_url(request.url)
+        content_to_analyze = await extract_text_from_url(request.url, request.language)
 
     if not content_to_analyze or len(content_to_analyze) < 50:
         logger.warning("Not enough text found to analyze")
