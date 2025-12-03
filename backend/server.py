@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from playwright.async_api import async_playwright
 from llm import GPTAnswerer
+from logger import logger
 
 app = FastAPI()
 
@@ -32,6 +33,7 @@ class AnalysisRequest(BaseModel):
 
 
 async def extract_text_from_url(url):
+    logger.info(f"Starting text extraction from URL: {url}")
     try:
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
@@ -41,8 +43,9 @@ async def extract_text_from_url(url):
 
             try:
                 await page.goto(url, wait_until="networkidle", timeout=30000)
-            except Exception:
+            except Exception as e:
                 # If networkidle times out, we still might have useful content
+                logger.warning(f"Page load timed out or failed for {url}: {str(e)}")
                 pass
 
             content = await page.content()
@@ -58,25 +61,36 @@ async def extract_text_from_url(url):
         # Clean up whitespace
         lines = (line.strip() for line in text.splitlines())
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+        logger.info(f"Successfully extracted text from {url}")
         return "\n".join(chunk for chunk in chunks if chunk)
     except Exception as e:
+        logger.error(f"Failed to scrape URL {url}: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Failed to scrape URL: {str(e)}")
 
 
 @app.post("/analyze")
 async def analyze(request: AnalysisRequest):
+    logger.info(f"Received analysis request. URL: {request.url}")
     if not request.api_key:
+        logger.warning("API Key missing in request")
         raise HTTPException(status_code=401, detail="API Key missing")
 
     # 1. Determine Source (URL scrape vs Raw Text)
     content_to_analyze = request.text
     if request.url:
+        logger.info(f"Scraping content from URL: {request.url}")
         content_to_analyze = await extract_text_from_url(request.url)
 
     if not content_to_analyze or len(content_to_analyze) < 50:
+        logger.warning("Not enough text found to analyze")
         raise HTTPException(status_code=400, detail="Not enough text found to analyze.")
 
+    logger.info(f"Content length to analyze: {len(content_to_analyze)}")
+
     try:
+        logger.info(
+            f"Initializing GPTAnswerer with provider: {request.llm_model_provider}, model: {request.llm_model}"
+        )
         gpt_answerer = GPTAnswerer(
             api_key=request.api_key,
             llm_proxy="",
@@ -86,10 +100,13 @@ async def analyze(request: AnalysisRequest):
             free_tier=request.free_tier,
             free_tier_rpm_limit=request.free_tier_rpm_limit,
         )
+        logger.info("Starting agreement analysis...")
         response = gpt_answerer.analyze_agreement(content_to_analyze, language=request.language)
+        logger.info("Agreement analysis completed successfully")
         return {"result": response}
 
     except Exception as e:
+        logger.error(f"Error during analysis: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

@@ -15,6 +15,7 @@ A Chrome Extension that uses AI to analyze legal agreements, terms of service, a
 - Text extraction and preprocessing
 - LLM integration via LangChain
 - Support for multiple LLM providers (Gemini, OpenAI, Claude, Ollama)
+- robust logging via Loguru
 
 **AI Integration**: Uses LangChain for LLM orchestration with configurable model support. Defaults to Google Gemini but can be configured for other providers. Includes rate limiting for free-tier API usage.
 
@@ -23,13 +24,21 @@ A Chrome Extension that uses AI to analyze legal agreements, terms of service, a
 - **Context Menu Analysis**: Right-click to analyze current page text or linked agreements
 - **URL Scraping**: Automatically scrapes and extracts text from linked pages using Playwright to handle dynamic content
 - **Multi-LLM Support**: Configurable to work with Gemini, OpenAI, Claude, or Ollama
+- **Advanced Configuration**:
+    - **Language Selection**: Auto-detect or force specific output language (English, Russian, French, etc.)
+    - **Model Selection**: Custom model names (e.g., `gemini-2.0-flash`) and temperature control
+    - **Rate Limiting**: Configurable RPM limits for free tier usage
 - **BYOK (Bring Your Own Key)**: Users provide their own API keys via extension options page
 - **Dedicated Results Tab**: Results displayed in a full-page view with markdown formatting support
 
 ## Technical Stack
 
 - **Extension**: JavaScript, Chrome Extension Manifest V3, Chrome Storage API, marked.js (for Markdown rendering)
-- **Backend**: Python 3.9+, FastAPI, Uvicorn, Playwright, BeautifulSoup4, Requests
+- **Backend**: 
+    - Python 3.13+, FastAPI, Uvicorn
+    - **Dependency Management**: `uv` (pyproject.toml, uv.lock)
+    - **Scraping**: Playwright, BeautifulSoup4, Requests
+    - **Logging**: Loguru
 - **AI**: LangChain, Google GenAI (default), with support for OpenAI, Anthropic, and Ollama
 - **Communication**: REST API between extension and backend (localhost:8001)
 
@@ -39,7 +48,9 @@ A Chrome Extension that uses AI to analyze legal agreements, terms of service, a
 - `server.py`: Main FastAPI application entry point. Handles API endpoints (`/analyze`), Playwright scraping logic, request validation, and CORS settings.
 - `llm.py`: Core AI logic. Contains the `AIAdapter` and model classes (Gemini, OpenAI, etc.) to interface with different LLM providers.
 - `prompts.py`: Stores system prompts and templates used to instruct the LLM on how to analyze agreements.
-- `requirements.txt`: List of Python dependencies required to run the backend server.
+- `logger.py`: Logging configuration using `loguru`, handling file rotation and retention policy (logs to `logs/`).
+- `pyproject.toml`: Project metadata and dependency definitions (managed by `uv`).
+- `uv.lock`: Lock file for exact dependency versions.
 - `Dockerfile`: Container configuration for the backend service.
 
 ### Extension (`/extension`)
@@ -48,8 +59,8 @@ A Chrome Extension that uses AI to analyze legal agreements, terms of service, a
 - `result.html`: The HTML template for the results tab where analysis is displayed.
 - `result.js`: Handles receiving the analysis result from the background script and rendering it.
 - `marked.min.js`: Library for rendering Markdown content in the results page.
-- `options.html`: HTML interface for the extension settings page where users input their API keys.
-- `options.js`: Logic for saving and retrieving user settings (API keys) using `chrome.storage`.
+- `options.html`: HTML interface for the extension settings page. Now includes language, model specific settings, and rate limiting.
+- `options.js`: Logic for saving and retrieving user settings (API keys, model preferences) using `chrome.storage`.
 - `icon.png`: Extension icon used in the browser toolbar and management page.
 
 ### Root

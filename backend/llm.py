@@ -13,6 +13,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from google.genai import types
 
 import prompts
+from logger import logger
 
 
 def pause(low: int = 1, high: int = 2) -> None:
@@ -37,6 +38,8 @@ class GeminiModel(AIModel):
         from langchain_google_genai import ChatGoogleGenerativeAI, HarmBlockThreshold, HarmCategory
 
         self.google_api_key = api_key
+
+        logger.debug(f"Initializing GeminiModel with model: {llm_model}")
 
         # Configure HTTP options with proxy if provided
         model_kwargs = {
@@ -67,6 +70,7 @@ class GeminiModel(AIModel):
         self.model = ChatGoogleGenerativeAI(**model_kwargs)
 
     def invoke(self, prompt: ChatPromptTemplate) -> BaseMessage:
+        logger.debug("Invoking GeminiModel...")
         prompt_messages = [SystemMessage(content=prompts.system_role)] + prompt.messages
         # randomly select one proxy after another until LLM request succeeds
         response = self.model.invoke(prompt_messages)
@@ -84,6 +88,7 @@ class OpenAIModel(AIModel):
         self.llm_proxy = llm_proxy
         self.model_name = llm_model
         self.openai_api_key = api_key
+        logger.debug(f"Initializing OpenAIModel with model: {llm_model}")
         self.model = ChatOpenAI(
             model_name=self.model_name,
             openai_api_key=self.openai_api_key,
@@ -95,6 +100,7 @@ class OpenAIModel(AIModel):
         )
 
     def invoke(self, prompt: ChatPromptTemplate) -> BaseMessage:
+        logger.debug("Invoking OpenAIModel...")
         prompt_messages = [SystemMessage(content=prompts.system_role)] + prompt.messages
         response = self.model.invoke(prompt_messages)
         return response
@@ -106,9 +112,11 @@ class ClaudeModel(AIModel):
     def __init__(self, api_key: str, llm_model: str, temperature: float) -> None:
         from langchain_anthropic import ChatAnthropic
 
+        logger.debug(f"Initializing ClaudeModel with model: {llm_model}")
         self.model = ChatAnthropic(model=llm_model, api_key=api_key, temperature=temperature)
 
     def invoke(self, prompt: str) -> BaseMessage:
+        logger.debug("Invoking ClaudeModel...")
         response = self.model.invoke(prompt)
         return response
 
@@ -119,12 +127,15 @@ class OllamaModel(AIModel):
     def __init__(self, llm_model: str, llm_api_url: str) -> None:
         from langchain_ollama import ChatOllama
 
+        logger.debug(f"Initializing OllamaModel with model: {llm_model}")
+
         if len(llm_api_url) > 0:
             self.model = ChatOllama(model=llm_model, base_url=llm_api_url)
         else:
             self.model = ChatOllama(model=llm_model)
 
     def invoke(self, prompt: str) -> BaseMessage:
+        logger.debug("Invoking OllamaModel...")
         response = self.model.invoke(prompt)
         return response
 
@@ -152,6 +163,7 @@ class AIAdapter:
         self.model = self._create_model(api_key, llm_proxy, llm_api_url)
 
     def _create_model(self, api_key: str, llm_proxy: str, llm_api_url: str) -> AIModel:
+        logger.info(f"Creating AI model for provider: {self.model_provider}")
         if self.model_provider == "Gemini":
             return GeminiModel(api_key, self.llm_model, llm_proxy, self.temperature)
         elif self.model_provider == "OpenAI":
@@ -180,8 +192,12 @@ class AIAdapter:
                 first_request_timestamp = self.free_tier_request_queue.popleft()
                 time_delta = datetime.now() - first_request_timestamp
                 if time_delta < timedelta(seconds=60):
-                    pause(60 - time_delta.total_seconds(), 60 - time_delta.total_seconds() + 1)
+                    pause_seconds = 60 - time_delta.total_seconds()
+                    logger.info(f"Rate limit reached. Pausing for {pause_seconds:.2f} seconds")
+                    pause(pause_seconds, pause_seconds + 1)
             self.free_tier_request_queue.append(datetime.now())
+
+        logger.debug("AIAdapter invoking model")
         return self.model.invoke(prompt)
 
 
@@ -246,6 +262,7 @@ class GPTAnswerer:
         """
         Analyze agreement
         """
+        logger.info(f"Analyzing agreement. Text length: {len(text)}")
         if language:
             language_instructions = f"Respond in {language}."
         else:
@@ -256,5 +273,9 @@ class GPTAnswerer:
                 """
 
         chain = self.chains["analyze_agreement"]
+        logger.debug("Invoking analysis chain")
+        logger.debug(f"Language instructions: {language_instructions}")
+        logger.debug(f"Text:\n{text}")
         output = chain.invoke({"text": text, "language_instructions": language_instructions})
+        logger.info("Analysis chain execution completed")
         return output
