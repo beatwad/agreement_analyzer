@@ -20,8 +20,8 @@ Analyze the text below for "red flags"—clauses that pose significant risk, lia
 3. **Markdown Format:** Use bullet points and bold text.
 
 ### Structure of the Output:
-If the text does not contain any agreement, just write that no agreement was found in the target language.
-Else, analyze the agreement, translate the following concepts into the target language and use them as headers:
+If the text does not contain any agreement, just write that no agreement was found in the language specified above.
+Else, analyze the agreement, translate the following concepts into the language specified above and use them as headers:
 
 - **Header 1: Equivalent of "Executive Summary"**: A 1-sentence overview of risk.
 - **Header 2: Equivalent of "Critical Red Flags"**: The most dangerous clauses.
@@ -29,6 +29,4 @@ Else, analyze the agreement, translate the following concepts into the target la
 
 TEXT TO ANALYZE:
 {text}
-
-I remind you that you MUST respond ONLY in the language specified above.
 """
