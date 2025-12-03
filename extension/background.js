@@ -18,6 +18,7 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener((info, tab) => {
     // Get Settings
     chrome.storage.sync.get({
+        language: '',
         geminiKey: '',
         modelProvider: 'Gemini',
         modelName: 'gemini-2.0-flash',
@@ -32,6 +33,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         }
 
         const config = {
+            language: result.language,
             apiKey: result.geminiKey,
             modelProvider: result.modelProvider,
             modelName: result.modelName,
@@ -81,6 +83,7 @@ async function handleAnalysis(config, serverUrl, text, url) {
                 api_key: config.apiKey,
                 text: text,
                 url: url,
+                language: config.language,
                 llm_model: config.modelName,
                 llm_model_provider: config.modelProvider,
                 temperature: config.temperature,

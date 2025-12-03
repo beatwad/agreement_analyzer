@@ -15,14 +15,13 @@ Analyze the text below for "red flags"—clauses that pose significant risk, lia
 4. **Location:** Cite the clause number/section if available.
 
 ### Language & Formatting Rules (CRITICAL):
-1. **Detect the Language:** Identify the language of the input text.
-2. **Unified Language Output:** The **ENTIRE** response must be in that detected language. This includes the analysis, the quotes, and **specifically the section headers**.
+1. **Language:** {language_instructions}
+2. **Unified Language Output:** The **ENTIRE** response must be in the language specified above. This includes the analysis and **specifically the section headers**.
 3. **Markdown Format:** Use bullet points and bold text.
 
 ### Structure of the Output:
-Do not use English headers unless the input text is in English. 
-If the text does not contain any agreement, just write that no agreement was found in the language of the input text.
-Else, analyze the agreement, translate the following concepts into the detected language and use them as headers:
+If the text does not contain any agreement, just write that no agreement was found in the target language.
+Else, analyze the agreement, translate the following concepts into the target language and use them as headers:
 
 - **[Header 1: Equivalent of "Executive Summary"]**: A 1-sentence overview of risk.
 - **[Header 2: Equivalent of "Critical Red Flags"]**: The most dangerous clauses.

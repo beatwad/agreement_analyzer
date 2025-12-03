@@ -23,6 +23,7 @@ class AnalysisRequest(BaseModel):
     api_key: str
     text: Optional[str] = None
     url: Optional[str] = None
+    language: Optional[str] = None
     llm_model: str = "gemini-2.0-flash"
     llm_model_provider: str = "Gemini"
     temperature: float = 0.4
@@ -85,7 +86,7 @@ async def analyze(request: AnalysisRequest):
             free_tier=request.free_tier,
             free_tier_rpm_limit=request.free_tier_rpm_limit,
         )
-        response = gpt_answerer.analyze_agreement(content_to_analyze)
+        response = gpt_answerer.analyze_agreement(content_to_analyze, language=request.language)
         return {"result": response}
 
     except Exception as e:

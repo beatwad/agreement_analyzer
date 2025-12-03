@@ -242,10 +242,19 @@ class GPTAnswerer:
         prompt = ChatPromptTemplate.from_template(template)
         return prompt | self.llm_cheap | StrOutputParser()
 
-    def analyze_agreement(self, text: str) -> str:
+    def analyze_agreement(self, text: str, language: str = "") -> str:
         """
         Analyze agreement
         """
+        if language:
+            language_instructions = f"Respond in {language}."
+        else:
+            language_instructions = """
+                Identify the language of the input text. Respond in that detected language.
+                If language is Finnish, respond in English (server is on Finnish hosting,
+                but this doesn't mean that the user is Finnish).
+                """
+
         chain = self.chains["analyze_agreement"]
-        output = chain.invoke({"text": text})
+        output = chain.invoke({"text": text, "language_instructions": language_instructions})
         return output
