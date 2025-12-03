@@ -23,6 +23,7 @@ dependencies = [
     "langchain-google-genai>=3.2.0",
     "langchain-ollama>=1.0.0",
     "langchain-openai>=1.1.0",
+    "loguru>=0.7.3",
     "playwright>=1.56.0",
     "pydantic>=2.12.4",
     "python-dotenv>=1.2.1",
