@@ -6,9 +6,10 @@ A Google Chrome Extension that uses AI to analyze text or link to Terms of Servi
 
 *   **Analyze Page:** Right-click anywhere on a page to analyze the visible text.
 *   **Analyze Link:** Right-click a link (e.g., "Terms of Service") to scrape that URL and analyze its content without visiting it manually.
-*   **AI Summaries:** Uses LLM to highlight key points, red flags, and summaries.
-*   **Multi-Model Support:** Works with Google Gemini (default), OpenAI, Claude (Anthropic), and Ollama (local LLMs).
-*   **BYOK (Bring Your Own Key):** Securely input your own Google Gemini API Key in the extension settings.
+    *   **AI Summaries:** Uses LLM to highlight key points, red flags, and summaries.
+    *   **Language Support:** Analyze agreements in any language and get results in your preferred language (or auto-detect).
+    *   **Multi-Model Support:** Works with Google Gemini (default), OpenAI, Claude (Anthropic), and Ollama (local LLMs).
+    *   **BYOK (Bring Your Own Key):** Securely input your own Google Gemini API Key in the extension settings.
 
 ## 🛠️ Tech Stack
 
@@ -94,10 +95,16 @@ agreement-analyzer/
 
 ## 📖 Usage Guide
 
-### Step 1: Configure API Key
+### Step 1: Configure API Key & Settings
 1.  Click the extension icon (puzzle piece) in Chrome and find "Agreement Analyzer".
 2.  Right-click the icon and select **Options**.
-3.  Paste your **Google Gemini API Key** into the field and click **Save**.
+3.  Select your preferred **Language** for the analysis results (or leave as "Auto-detect").
+4.  Select your preferred **Model Provider** and **LLM Model**.
+5.  Paste your **API Key**.
+6.  Set **Free Tier** to true if you uses model with free tier.
+7.  Set **Free Tier RPM Limit** to the maximum number of requests per minute that model provider allows for free tier.
+8.  Set **Temperature** to the desired value between 0.0 and 1.0 (the more temperature, the more creative the model is and vice versa).
+9.  Click **Save** to apply your settings.
 
 ### Step 2: Analyze Text
 *   **Current Page:** Right-click anywhere on a webpage $\rightarrow$ Select **"Analyze Current Page Agreement"**.
