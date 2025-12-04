@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import textwrap
 from abc import ABC, abstractmethod
@@ -219,7 +219,7 @@ class LoggerChatModel:
         return reply
 
 
-class GPTAnswerer:
+class LLMAnswerer:
     """
     Class for processing resume questions and generating answers using LLM.
     The class includes methods for processing and determining resume sections such as
@@ -258,7 +258,9 @@ class GPTAnswerer:
         prompt = ChatPromptTemplate.from_template(template)
         return prompt | self.llm_cheap | StrOutputParser()
 
-    def analyze_agreement(self, text: str, language: str = "") -> str:
+    def analyze_agreement(
+        self, text: str, language: str = "", custom_prompt: Optional[str] = None
+    ) -> str:
         """
         Analyze agreement
         """
@@ -273,10 +275,15 @@ class GPTAnswerer:
                 but this doesn't mean that the user is Finnish).
                 """
 
-        chain = self.chains["analyze_agreement"]
+        if custom_prompt:
+            logger.debug(f"Using custom prompt for analysis:\n{custom_prompt}\n")
+            chain = self._create_chain(custom_prompt)
+        else:
+            chain = self.chains["analyze_agreement"]
+
         logger.debug("Invoking analysis chain")
         logger.debug(f"Language instructions: {language_instructions}")
-        logger.debug(f"Text:\n{text[:1000]}")
+        logger.debug(f"Text:\n{text[:1000]}\n")
         output = chain.invoke({"text": text, "language_instructions": language_instructions})
         logger.info("Analysis chain execution completed")
         return output

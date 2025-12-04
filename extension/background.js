@@ -23,7 +23,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         modelName: 'gemini-2.0-flash',
         temperature: 0.4,
         freeTier: true,
-        rpmLimit: 15
+        rpmLimit: 15,
+        customPrompt: ''
     }, (result) => {
         if (!result.geminiKey) {
             alert("Please set your API Key in the extension settings.");
@@ -38,7 +39,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             modelName: result.modelName,
             temperature: result.temperature,
             freeTier: result.freeTier,
-            rpmLimit: result.rpmLimit
+            rpmLimit: result.rpmLimit,
+            customPrompt: result.customPrompt
         };
         
         if (info.menuItemId === "analyze-link") {
@@ -87,7 +89,8 @@ async function handleAnalysis(config, serverUrl, text, url) {
                 llm_model_provider: config.modelProvider,
                 temperature: config.temperature,
                 free_tier: config.freeTier,
-                free_tier_rpm_limit: config.rpmLimit
+                free_tier_rpm_limit: config.rpmLimit,
+                custom_prompt: config.customPrompt
             })
         });
 

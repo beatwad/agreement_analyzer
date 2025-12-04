@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from playwright.async_api import async_playwright
-from llm import GPTAnswerer
+from llm import LLMAnswerer
 from logger import logger
 
 app = FastAPI()
@@ -30,6 +30,7 @@ class AnalysisRequest(BaseModel):
     temperature: float = 0.4
     free_tier: bool = True
     free_tier_rpm_limit: int = 15
+    custom_prompt: Optional[str] = None
 
 
 LANGUAGE_TO_LOCALE = {
@@ -114,9 +115,9 @@ async def analyze(request: AnalysisRequest):
 
     try:
         logger.info(
-            f"Initializing GPTAnswerer with provider: {request.llm_model_provider}, model: {request.llm_model}"
+            f"Initializing LLMAnswerer with provider: {request.llm_model_provider}, model: {request.llm_model}"
         )
-        gpt_answerer = GPTAnswerer(
+        gpt_answerer = LLMAnswerer(
             api_key=request.api_key,
             llm_proxy="",
             llm_provider=request.llm_model_provider,
@@ -126,7 +127,9 @@ async def analyze(request: AnalysisRequest):
             free_tier_rpm_limit=request.free_tier_rpm_limit,
         )
         logger.info("Starting agreement analysis...")
-        response = gpt_answerer.analyze_agreement(content_to_analyze, language=request.language)
+        response = gpt_answerer.analyze_agreement(
+            content_to_analyze, language=request.language, custom_prompt=request.custom_prompt
+        )
         logger.info("Agreement analysis completed successfully")
         return {"result": response}
 

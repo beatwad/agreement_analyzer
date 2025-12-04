@@ -6,7 +6,7 @@ You do not offer general advice; you provide specific analysis based ONLY on the
 """
 
 analyze_agreement_prompt = """
-Analyze the text below for "red flags"—clauses that pose significant risk, liability, or unfair burden to the signing party.
+Analyze the text below for "red flags"-clauses that pose significant risk, liability, or unfair burden to the signing party.
 
 ### Analysis Guidelines:
 1. **Identify Risks:** Look for hidden fees, automatic renewals, non-competes, unbalanced indemnification, strict penalties, and unilateral termination rights.

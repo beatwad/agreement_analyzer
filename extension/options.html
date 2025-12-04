@@ -6,7 +6,7 @@
         body { font-family: sans-serif; padding: 20px; max-width: 500px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="password"], input[type="number"], select { 
+        input[type="text"], input[type="password"], input[type="number"], select, textarea { 
             width: 100%; 
             padding: 8px; 
             box-sizing: border-box; 
@@ -71,6 +71,14 @@
     <div class="form-group">
         <label for="rpmLimit">Free Tier RPM Limit:</label>
         <input type="number" id="rpmLimit" min="1" value="15">
+    </div>
+
+    <div class="form-group">
+        <label for="customPrompt">Custom Prompt (Optional):</label>
+        <div style="font-size: 0.85em; color: #555; margin-bottom: 5px;">
+            Required placeholders: <code>{text}</code> and <code>{language_instructions}</code>.
+        </div>
+        <textarea id="customPrompt" rows="10" placeholder="Leave empty to use default prompt..."></textarea>
     </div>
 
     <button id="save">Save Settings</button>
