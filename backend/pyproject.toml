@@ -26,7 +26,6 @@ dependencies = [
     "loguru>=0.7.3",
     "playwright>=1.56.0",
     "pydantic>=2.12.4",
-    "python-dotenv>=1.2.1",
     "requests>=2.32.5",
     "uvicorn>=0.38.0",
 ]

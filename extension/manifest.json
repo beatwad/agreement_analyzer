@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Agreement Analyzer",
+    "name": "TOS RedFlags",
     "version": "1.0",
-    "description": "Analyze legal text using LLM",
+    "description": "Detect red flags in Terms of Service/User Agreement/Contract/etc using LLM",
     "permissions": [
       "contextMenus",
       "activeTab",
