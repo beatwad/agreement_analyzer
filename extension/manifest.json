@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "TOS RedFlags",
+    "name": "Agreement Analyzer",
     "version": "1.0",
     "description": "Detect red flags in Terms of Service/User Agreement/Contract/etc using LLM",
     "permissions": [
