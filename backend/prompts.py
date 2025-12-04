@@ -9,7 +9,7 @@ analyze_agreement_prompt = """
 Analyze the text below for "red flags"-clauses that pose significant risk, liability, or unfair burden to the signing party.
 
 ### Analysis Guidelines:
-1. **Identify Risks:** Look for hidden fees, automatic renewals, non-competes, unbalanced indemnification, strict penalties, and unilateral termination rights.
+1. **Identify Risks:** Look for hidden fees, automatic renewals, non-competes, unbalanced indemnification, any penalties, unilateral termination rights, etc.
 2. **Severity Sorting:** List red flags in descending order of severity (High Risk -> Medium Risk).
 3. **Evidence:** You MUST quote the specific snippet of text that contains the red flag.
 4. **Location:** Cite the clause number/section if available.
