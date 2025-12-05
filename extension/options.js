@@ -6,7 +6,8 @@ const defaults = {
     modelName: 'gemini-2.0-flash',
     temperature: 0.4,
     freeTier: true,
-    rpmLimit: 15
+    rpmLimit: 15,
+    customPrompt: ''
 };
 
 document.getElementById('save').addEventListener('click', () => {
@@ -17,6 +18,7 @@ document.getElementById('save').addEventListener('click', () => {
     const temperature = parseFloat(document.getElementById('temperature').value);
     const freeTier = document.getElementById('freeTier').checked;
     const rpmLimit = parseInt(document.getElementById('rpmLimit').value);
+    const customPrompt = document.getElementById('customPrompt').value;
 
     chrome.storage.sync.set({ 
         language: language,
@@ -25,7 +27,8 @@ document.getElementById('save').addEventListener('click', () => {
         modelName: modelName,
         temperature: temperature,
         freeTier: freeTier,
-        rpmLimit: rpmLimit
+        rpmLimit: rpmLimit,
+        customPrompt: customPrompt
     }, () => {
         document.getElementById('status').innerText = 'Saved!';
         setTimeout(() => document.getElementById('status').innerText = '', 2000);
@@ -42,5 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('temperature').value = items.temperature;
         document.getElementById('freeTier').checked = items.freeTier;
         document.getElementById('rpmLimit').value = items.rpmLimit;
+        document.getElementById('customPrompt').value = items.customPrompt;
     });
 });
