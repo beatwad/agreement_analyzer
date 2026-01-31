@@ -22,8 +22,9 @@ A Google Chrome Extension that uses AI to analyze text or link to Terms of Servi
 ## 📋 Prerequisites
 
 1.  **Python 3.9** or higher installed.
-2.  **Google Chrome** (or Chromium-based browsers like Brave/Edge).
-3.  **Google Gemini API Key** (Get one for free at [Google AI Studio](https://aistudio.google.com/)).
+2.  **uv** installed (https://docs.astral.sh/uv/).
+3.  **Google Chrome** (or Chromium-based browsers like Brave/Edge).
+4.  **Google Gemini API Key** (Get one for free at [Google AI Studio](https://aistudio.google.com/)).
 
 ---
 
@@ -55,15 +56,11 @@ agreement-analyzer/
     ```
 2.  Install the required dependencies:
     ```bash
-    pip install -r requirements.txt
+    uv sync --frozen --no-dev
     ```
 3.  Start the server:
     ```bash
-    # Option A: Direct Python run
-    python server.py
-    
-    # Option B: Using Uvicorn directly (recommended for dev)
-    uvicorn server:app --reload --port 8001
+    uv run uvicorn server:app --reload --port 8001
     ```
     *The server will run at `http://127.0.0.1:8001`.*
 

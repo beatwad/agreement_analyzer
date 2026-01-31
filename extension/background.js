@@ -1,4 +1,4 @@
-const SERVER_URL = "https://mayor-yen-appointment-americas.trycloudflare.com";
+const SERVER_URL = "https://together-moderator-robin-foot.trycloudflare.com";
 
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({

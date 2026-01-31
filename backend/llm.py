@@ -6,6 +6,7 @@ from collections import deque
 from datetime import datetime, timedelta
 import random
 import time
+import httpx
 
 from langchain_core.messages import BaseMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
@@ -45,7 +46,7 @@ class GeminiModel(AIModel):
             "temperature": temperature,
             "safety_settings": {
                 HarmCategory.HARM_CATEGORY_UNSPECIFIED: HarmBlockThreshold.BLOCK_NONE,
-                HarmCategory.HARM_CATEGORY_DEROGATORY: HarmBlockThreshold.BLOCK_NONE,
+                # HarmCategory.HARM_CATEGORY_DEROGATORY: HarmBlockThreshold.BLOCK_NONE,
                 HarmCategory.HARM_CATEGORY_TOXICITY: HarmBlockThreshold.BLOCK_NONE,
                 HarmCategory.HARM_CATEGORY_VIOLENCE: HarmBlockThreshold.BLOCK_NONE,
                 HarmCategory.HARM_CATEGORY_SEXUAL: HarmBlockThreshold.BLOCK_NONE,
@@ -81,17 +82,22 @@ class OpenAIModel(AIModel):
     ) -> None:
         from langchain_openai import ChatOpenAI
 
+        if llm_proxy:
+            http_client = httpx.Client(proxy=llm_proxy)
+        else:
+            http_client = None
         self.llm_proxy = llm_proxy
         self.model_name = llm_model
         self.openai_api_key = api_key
         self.model = ChatOpenAI(
             model_name=self.model_name,
             openai_api_key=self.openai_api_key,
-            openai_proxy=self.llm_proxy,
-            temperature=temperature,
+            http_client=http_client,
+            temperature=1 if "o1" in self.model_name or "gpt-5" in self.model_name else temperature,
             presence_penalty=0,
             frequency_penalty=0,
             timeout=60,
+            reasoning_effort="minimal",
         )
 
     def invoke(self, prompt: ChatPromptTemplate) -> BaseMessage:
