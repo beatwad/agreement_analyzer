@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import random
 import time
 import httpx
+from loguru import logger
 
 from langchain_core.messages import BaseMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
@@ -37,6 +38,9 @@ class GeminiModel(AIModel):
     def __init__(self, api_key: str, llm_model: str, llm_proxy: str, temperature: float) -> None:
         from langchain_google_genai import ChatGoogleGenerativeAI, HarmBlockThreshold, HarmCategory
 
+        logger.info(
+            f"Initializing GeminiModel: model={llm_model}, temperature={temperature}, proxy={'configured' if llm_proxy else 'none'}"
+        )
         self.google_api_key = api_key
 
         # Configure HTTP options with proxy if provided
@@ -66,12 +70,19 @@ class GeminiModel(AIModel):
             model_kwargs["http_options"] = http_options
 
         self.model = ChatGoogleGenerativeAI(**model_kwargs)
+        logger.debug("GeminiModel initialized successfully")
 
     def invoke(self, prompt: ChatPromptTemplate) -> BaseMessage:
+        logger.debug("Invoking Gemini model")
         prompt_messages = [SystemMessage(content=prompts.system_role)] + prompt.messages
         # randomly select one proxy after another until LLM request succeeds
-        response = self.model.invoke(prompt_messages)
-        return response
+        try:
+            response = self.model.invoke(prompt_messages)
+            logger.debug("Gemini model invocation completed successfully")
+            return response
+        except Exception as e:
+            logger.error(f"Gemini model invocation failed: {str(e)}", exc_info=True)
+            raise
 
 
 class OpenAIModel(AIModel):
@@ -82,6 +93,9 @@ class OpenAIModel(AIModel):
     ) -> None:
         from langchain_openai import ChatOpenAI
 
+        logger.info(
+            f"Initializing OpenAIModel: model={llm_model}, temperature={temperature}, proxy={'configured' if llm_proxy else 'none'}"
+        )
         if llm_proxy:
             http_client = httpx.Client(proxy=llm_proxy)
         else:
@@ -89,21 +103,31 @@ class OpenAIModel(AIModel):
         self.llm_proxy = llm_proxy
         self.model_name = llm_model
         self.openai_api_key = api_key
+        effective_temp = 1 if "o1" in self.model_name or "gpt-5" in self.model_name else temperature
+        if effective_temp != temperature:
+            logger.debug(f"Temperature adjusted to {effective_temp} for model {self.model_name}")
         self.model = ChatOpenAI(
             model_name=self.model_name,
             openai_api_key=self.openai_api_key,
             http_client=http_client,
-            temperature=1 if "o1" in self.model_name or "gpt-5" in self.model_name else temperature,
+            temperature=effective_temp,
             presence_penalty=0,
             frequency_penalty=0,
             timeout=60,
             reasoning_effort="minimal",
         )
+        logger.debug("OpenAIModel initialized successfully")
 
     def invoke(self, prompt: ChatPromptTemplate) -> BaseMessage:
+        logger.debug("Invoking OpenAI model")
         prompt_messages = [SystemMessage(content=prompts.system_role)] + prompt.messages
-        response = self.model.invoke(prompt_messages)
-        return response
+        try:
+            response = self.model.invoke(prompt_messages)
+            logger.debug("OpenAI model invocation completed successfully")
+            return response
+        except Exception as e:
+            logger.error(f"OpenAI model invocation failed: {str(e)}", exc_info=True)
+            raise
 
 
 class ClaudeModel(AIModel):
@@ -112,11 +136,19 @@ class ClaudeModel(AIModel):
     def __init__(self, api_key: str, llm_model: str, temperature: float) -> None:
         from langchain_anthropic import ChatAnthropic
 
+        logger.info(f"Initializing ClaudeModel: model={llm_model}, temperature={temperature}")
         self.model = ChatAnthropic(model=llm_model, api_key=api_key, temperature=temperature)
+        logger.debug("ClaudeModel initialized successfully")
 
     def invoke(self, prompt: str) -> BaseMessage:
-        response = self.model.invoke(prompt)
-        return response
+        logger.debug("Invoking Claude model")
+        try:
+            response = self.model.invoke(prompt)
+            logger.debug("Claude model invocation completed successfully")
+            return response
+        except Exception as e:
+            logger.error(f"Claude model invocation failed: {str(e)}", exc_info=True)
+            raise
 
 
 class OllamaModel(AIModel):
@@ -125,14 +157,24 @@ class OllamaModel(AIModel):
     def __init__(self, llm_model: str, llm_api_url: str) -> None:
         from langchain_ollama import ChatOllama
 
+        logger.info(
+            f"Initializing OllamaModel: model={llm_model}, api_url={llm_api_url if llm_api_url else 'default'}"
+        )
         if len(llm_api_url) > 0:
             self.model = ChatOllama(model=llm_model, base_url=llm_api_url)
         else:
             self.model = ChatOllama(model=llm_model)
+        logger.debug("OllamaModel initialized successfully")
 
     def invoke(self, prompt: str) -> BaseMessage:
-        response = self.model.invoke(prompt)
-        return response
+        logger.debug("Invoking Ollama model")
+        try:
+            response = self.model.invoke(prompt)
+            logger.debug("Ollama model invocation completed successfully")
+            return response
+        except Exception as e:
+            logger.error(f"Ollama model invocation failed: {str(e)}", exc_info=True)
+            raise
 
 
 class AIAdapter:
@@ -158,6 +200,7 @@ class AIAdapter:
         self.model = self._create_model(api_key, llm_proxy, llm_api_url)
 
     def _create_model(self, api_key: str, llm_proxy: str, llm_api_url: str) -> AIModel:
+        logger.info(f"Creating AI model: provider={self.model_provider}, model={self.llm_model}")
         if self.model_provider == "Gemini":
             return GeminiModel(api_key, self.llm_model, llm_proxy, self.temperature)
         elif self.model_provider == "OpenAI":
@@ -169,6 +212,7 @@ class AIAdapter:
         else:
             # Fallback or error for unknown provider, trying lower case match if needed
             provider_lower = self.model_provider.lower()
+            logger.debug(f"Trying case-insensitive match for provider: {provider_lower}")
             if provider_lower == "gemini":
                 return GeminiModel(api_key, self.llm_model, llm_proxy, self.temperature)
             elif provider_lower == "openai":
@@ -178,6 +222,7 @@ class AIAdapter:
             elif provider_lower == "ollama":
                 return OllamaModel(self.llm_model, llm_api_url)
 
+            logger.error(f"Unsupported model provider: {self.model_provider}")
             raise ValueError(f"Unsupported model type: {self.model_provider}")
 
     def invoke(self, prompt: str) -> str:
@@ -186,9 +231,24 @@ class AIAdapter:
                 first_request_timestamp = self.free_tier_request_queue.popleft()
                 time_delta = datetime.now() - first_request_timestamp
                 if time_delta < timedelta(seconds=60):
-                    pause(60 - time_delta.total_seconds(), 60 - time_delta.total_seconds() + 1)
+                    wait_time = 60 - time_delta.total_seconds()
+                    logger.info(
+                        f"Rate limit reached ({self.free_tier_rpm_limit} requests). Waiting {wait_time:.1f}s before next request"
+                    )
+                    pause(wait_time, wait_time + 1)
             self.free_tier_request_queue.append(datetime.now())
-        return self.model.invoke(prompt)
+            logger.debug(
+                f"Free tier request queue: {len(self.free_tier_request_queue)}/{self.free_tier_rpm_limit} requests in current window"
+            )
+
+        logger.debug(f"Invoking AIAdapter with {self.model_provider} model")
+        try:
+            response = self.model.invoke(prompt)
+            logger.debug("AIAdapter invocation completed successfully")
+            return response
+        except Exception as e:
+            logger.error(f"AIAdapter invocation failed: {str(e)}", exc_info=True)
+            raise
 
 
 class LoggerChatModel:
@@ -252,6 +312,12 @@ class GPTAnswerer:
         """
         Analyze agreement
         """
+        logger.info(f"Starting agreement analysis: {len(text)} characters")
         chain = self.chains["analyze_agreement"]
-        output = chain.invoke({"text": text})
-        return output
+        try:
+            output = chain.invoke({"text": text})
+            logger.info(f"Agreement analysis completed: {len(output)} characters in response")
+            return output
+        except Exception as e:
+            logger.error(f"Agreement analysis failed: {str(e)}", exc_info=True)
+            raise

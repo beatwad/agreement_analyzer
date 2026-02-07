@@ -1,4 +1,5 @@
-const SERVER_URL = "https://together-moderator-robin-foot.trycloudflare.com";
+// const SERVER_URL = "http://localhost:8001";
+const SERVER_URL = "https://chancellor-science-whose-optimal.trycloudflare.com";
 
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
