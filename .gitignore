@@ -46,6 +46,7 @@ answers.yaml
 test_hh_api.ipynb
 test_proxy.py
 test.ipynb
+response.txt
 # PyInstaller
 # Usually these files are written by a python script from a template
 # before PyInstaller builds the exe, so as to inject date/other infos into it.
