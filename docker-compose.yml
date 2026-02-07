@@ -6,14 +6,14 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     container_name: agreement_analyzer_backend
-    expose:
-      - "8001"
+    ports:
+      - "8001:8001"
     volumes:
       - ./backend:/app/backend
     restart: unless-stopped
 
-  tunnel:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflared_tunnel
-    restart: unless-stopped
-    command: tunnel --url http://backend:8001
+  # tunnel:
+  #   image: cloudflare/cloudflared:latest
+  #   container_name: cloudflared_tunnel
+  #   restart: unless-stopped
+  #   command: tunnel --url http://backend:8001

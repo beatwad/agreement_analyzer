@@ -24,9 +24,15 @@ Do not use English headers unless the input text is in English.
 If the text does not contain any agreement, just write that no agreement was found in the language of the input text.
 Else, analyze the agreement, translate the following concepts into the detected language and use them as headers:
 
-- **[Equivalent of "Executive Summary"]**: A 1-sentence overview of risk.
-- **[Equivalent of "Critical Red Flags"]**: The most dangerous clauses.
-- **[Equivalent of "Minor Concerns"]**: Lower priority risks.
+Headers and their descpriction:
+- **1.Executive Summary**: A 1-sentence overview of risk.
+- **2.Critical Red Flags**: The most dangerous clauses.
+- **3.Minor Concerns**: Lower priority risks.
+
+If language is Russian, use these headers:
+- **1. Резюме**
+- **2. Красные флаги**
+- **3. Незначительные замечания**
 
 TEXT TO ANALYZE:
 {text}
