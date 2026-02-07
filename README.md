@@ -70,15 +70,11 @@ agreement-analyzer/
     ```bash
     cd agreement-analyzer
     ```
-2.  Create a `.env` file (optional, defaults to port 8001):
-    ```env
-    SERVER_PORT=8001
-    ```
-3.  Start the service:
+2.  Start the service:
     ```bash
     docker-compose up --build -d
     ```
-    *The server will run at `http://localhost:8001` (or your configured port).*
+    *The server will run at `http://localhost:8001`.*
 
 ### 2. Extension Setup (Chrome)
 
