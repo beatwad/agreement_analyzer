@@ -1,4 +1,4 @@
-FROM python:3.13.9-trixie
+FROM python:3.13.14-slim-trixie
 
 WORKDIR /app/backend
 ENV UV_PROJECT_ENVIRONMENT=/app/.venv
